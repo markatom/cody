@@ -1,0 +1,29 @@
+extensions:
+	- php
+	- phpt
+
+sources:
+	- src
+	- tests
+
+watchers:
+	Foo\Bar\Baz\Qux:
+		bool: TRUE
+		enum: bar
+		nested:
+			alpha: omega
+			beta: psi
+
+	- Lorem\Ipsum
+
+	Invalid\Bool\Value:
+		bool: 42
+
+	Invalid\Enum\Value:
+		nested:
+			enum: quix
+
+	Invalid\Int\Value:
+		deeply:
+			nested:
+				int: foo

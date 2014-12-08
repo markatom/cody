@@ -1,0 +1,11 @@
+extensions:
+	- php
+	- phpt
+
+sources:
+	- src
+	- tests
+
+preprocessors:
+
+watchers:
