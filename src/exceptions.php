@@ -15,10 +15,12 @@ class InvalidMoveException extends RuntimeException { }
 
 class ReadOnlyException extends LogicException { }
 
-class InvalidValue extends LogicException { }
+class InvalidValueException extends LogicException { }
 
-class RequiredValue extends LogicException { }
+class RequiredValueException extends LogicException { }
 
-class InvalidOption extends LogicException { }
+class InvalidOptionException extends LogicException { }
 
-class RequiredOption extends LogicException { }
+class RequiredOptionException extends LogicException { }
+
+class ReadException extends RuntimeException { }

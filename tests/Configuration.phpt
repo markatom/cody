@@ -52,7 +52,7 @@ Assert::throws(function () use ($configuration) {
 	$configuration->getWatcherOptions('Invalid\Bool\Value', [
 		'bool' => Option::bool(),
 	]);
-}, 'Markatom\Cody\InvalidOption', 'Invalid value for option bool of watcher Invalid\Bool\Value, expected boolean.');
+}, 'Markatom\Cody\InvalidOptionException', 'Invalid value for option bool of watcher Invalid\Bool\Value, expected boolean.');
 
 Assert::throws(function () use ($configuration) {
 	$configuration->getWatcherOptions('Invalid\Enum\Value', [
@@ -60,7 +60,7 @@ Assert::throws(function () use ($configuration) {
 			'enum' => Option::enum(['foo', 'bar', 'baz']),
 		],
 	]);
-}, 'Markatom\Cody\InvalidOption', 'Invalid value for option nested.enum of watcher Invalid\Enum\Value, expected one of [foo, bar, baz].');
+}, 'Markatom\Cody\InvalidOptionException', 'Invalid value for option nested.enum of watcher Invalid\Enum\Value, expected one of [foo, bar, baz].');
 
 Assert::throws(function () use ($configuration) {
 	$configuration->getWatcherOptions('Invalid\Int\Value', [
@@ -70,4 +70,4 @@ Assert::throws(function () use ($configuration) {
 			],
 		],
 	]);
-}, 'Markatom\Cody\InvalidOption', 'Invalid value for option deeply.nested.int of watcher Invalid\Int\Value, expected integer.');
+}, 'Markatom\Cody\InvalidOptionException', 'Invalid value for option deeply.nested.int of watcher Invalid\Int\Value, expected integer.');

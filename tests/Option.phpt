@@ -12,11 +12,11 @@ Assert::equal(TRUE, Option::bool(FALSE)->getValue(TRUE));
 
 Assert::throws(function () {
 	Option::bool()->getValue();
-}, 'Markatom\Cody\RequiredValue');
+}, 'Markatom\Cody\RequiredValueException');
 
 Assert::throws(function () {
 	Option::bool()->getValue(42);
-}, 'Markatom\Cody\InvalidValue');
+}, 'Markatom\Cody\InvalidValueException');
 
 // enum
 
@@ -25,15 +25,15 @@ Assert::equal('foo', Option::enum(['foo', 'bar', 'baz'], 'bar')->getValue('foo')
 
 Assert::throws(function () {
 	Option::enum(['foo', 'bar', 'baz'])->getValue();
-}, 'Markatom\Cody\RequiredValue');
+}, 'Markatom\Cody\RequiredValueException');
 
 Assert::throws(function () {
 	Option::enum(['foo', 'bar', 'baz'])->getValue('qux');
-}, 'Markatom\Cody\InvalidValue');
+}, 'Markatom\Cody\InvalidValueException');
 
 Assert::throws(function () {
 	Option::enum(['foo', 'bar', 'baz'])->getValue(TRUE);
-}, 'Markatom\Cody\InvalidValue');
+}, 'Markatom\Cody\InvalidValueException');
 
 // int
 
@@ -42,8 +42,8 @@ Assert::equal(666, Option::int(42)->getValue(666));
 
 Assert::throws(function () {
 	Option::int()->getValue();
-}, 'Markatom\Cody\RequiredValue');
+}, 'Markatom\Cody\RequiredValueException');
 
 Assert::throws(function () {
 	Option::int()->getValue('foo');
-}, 'Markatom\Cody\InvalidValue');
+}, 'Markatom\Cody\InvalidValueException');

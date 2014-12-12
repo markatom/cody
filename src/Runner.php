@@ -47,9 +47,8 @@ class Runner extends Object
 		$output->startProgress(count($files));
 
 		foreach ($files as $file) {
-			$source = file_get_contents($file);
-
-			$tokenizer = new Tokenizer($source, $this->readOnly);
+			$file      = new File($file, $this->readOnly);
+			$tokenizer = new Tokenizer($file);
 
 			foreach ($this->configuration->getWatchers() as $watcher) {
 				if (!class_exists($watcher)) {
@@ -61,7 +60,7 @@ class Runner extends Object
 				}
 
 				/** @var Watcher $watcher */
-				$watcher = new $watcher($file, $this->configuration->getWatcherOptions($watcher), $this->readOnly);
+				$watcher = new $watcher($file, $this->configuration->getWatcherOptions($watcher));
 
 				foreach ($watcher->getWatchedTokens() as $token => $method) {
 					$tokenizer->reset();
@@ -77,8 +76,6 @@ class Runner extends Object
 						}
 					}
 				}
-
-				$result = $watcher->getResult();
 
 				$output->advanceProgress($result);
 			}

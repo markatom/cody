@@ -13,9 +13,9 @@ class Whitespace extends Object
 {
 
 	const LINE_BREAK_PATTERN = '~
-		(?<!\r)\n  # line feed not preceded by carriage return (Unix-like)
-		| \r       # or carriage return (old OS X)
-		| \r\n     # or line feed with carriage return (Windows)
+		\r\n  # line feed with carriage return (Windows), must be first, next patterns will not match
+		| \n  # or line feed (Unix-like)
+		| \r  # or carriage return (old OS X)
 	~x';
 
     private function __construct() { } // static class

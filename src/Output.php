@@ -2,7 +2,9 @@
 
 namespace Markatom\Cody;
 
+use Markatom\Cody\Utils\Whitespace;
 use Nette\Object;
+use Nette\Utils\Strings;
 
 /**
  * @todo Fill desc.
@@ -12,6 +14,7 @@ class Output extends Object
 {
 
 	const HINT_FIX = 0;
+
 	const HINT_SHOW = 1;
 
 	private $totalCount;
@@ -26,8 +29,8 @@ class Output extends Object
 
 	private $violationsCount = 0;
 
-	/** @var Result[] */
-	private $results = [];
+	/** @var File[] */
+	private $files = [];
 
 	public function startProgress($totalCount)
 	{
@@ -38,18 +41,17 @@ class Output extends Object
 		echo '  ';
 	}
 
-	public function advanceProgress(Result $result)
+	public function advanceProgress(File $file)
 	{
-		static $indicators = [
-			Result::STATUS_OK            => ".",
-			Result::STATUS_WARNINGS_ONLY => "W",
-			Result::STATUS_VIOLATIONS    => "\033[1;37;41mV\033[0m"
-		];
+		$errors   = count($file->getErrors());
+		$warnings = count($file->getWarnings());
 
-		echo $indicators[$result->getStatus()];
+		echo $errors
+			? "\033[1;37;41mE\033[0m"
+			: ($warnings ? 'W' : '.');
 
-		$this->warningsCount += count($result->getWarnings());
-		$this->violationsCount   += count($result->getViolations());
+		$this->warningsCount   += $warnings;
+		$this->violationsCount += $errors;
 
 		$this->counter++;
 
@@ -58,8 +60,8 @@ class Output extends Object
 			echo '  ';
 		}
 
-		if ($result->getStatus() !== Result::STATUS_OK) {
-			$this->results[] = $result;
+		if ($errors || $warnings) {
+			$this->files[] = $file;
 		}
 	}
 
@@ -74,15 +76,10 @@ class Output extends Object
 		echo PHP_EOL;
 	}
 
-	/**
-	 * @param Result[] $results
-	 */
-	public function writeResults(array $results)
+	public function writeResults()
 	{
-		foreach ($results as $result) {
-			if ($result->getViolations() || $result->getWarnings()) {
-
-			}
+		foreach ($this->files as $file) {
+			echo $file->getPath() . PHP_EOL;
 		}
 	}
 
@@ -103,6 +100,16 @@ class Output extends Object
 	private function writeProgressCounter()
 	{
 		echo '  ' . $this->counter . '/' . $this->totalCount . PHP_EOL;
+	}
+
+	/**
+	 * @param File $file
+	 * @param Marker $marker
+	 * @return array
+	 */
+	public function getMarkerPosition(Marker $marker, File $file)
+	{
+
 	}
 
 }

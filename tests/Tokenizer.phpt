@@ -1,12 +1,14 @@
 <?php
 
+use Markatom\Cody\File;
 use Markatom\Cody\ReadOnlyException;
 use Markatom\Cody\Tokenizer;
 use Tester\Assert;
 
 require_once __DIR__ . '/bootstrap.php';
 
-$tokenizer = new Tokenizer(file_get_contents(__DIR__ . '/files/Tokenizer/in.php'), TRUE); // read only
+
+$tokenizer = new Tokenizer(new File(__DIR__ . '/files/Tokenizer/in.php', TRUE)); // read only
 
 Assert::equal(70, $tokenizer->moveNext(T_CLASS)->getNext('{')->offset);
 
@@ -20,7 +22,7 @@ Assert::exception(function () use ($tokenizer) {
 	$tokenizer->removeCurrent();
 }, ReadOnlyException::class);
 
-$tokenizer = new Tokenizer(file_get_contents(__DIR__ . '/files/Tokenizer/in.php'), FALSE); // writable
+$tokenizer = new Tokenizer(new File(__DIR__ . '/files/Tokenizer/in.php', FALSE)); // writable
 
 do {
 	$tokenizer->moveNext(T_FUNCTION);
@@ -35,6 +37,7 @@ $source = $tokenizer->movePrev(T_DOC_COMMENT)
 	->replaceCurrent("'Hello world!'")
 	->moveNext()
 	->insertAfterCurrent("\n\n\t\treturn TRUE;")
-	->getSource();
+	->getFile()
+	->getContent();
 
 Assert::equal(file_get_contents(__DIR__ . '/files/Tokenizer/out.php'), $source);

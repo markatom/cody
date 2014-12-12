@@ -8,7 +8,7 @@
         ]
     },
     "require": {
-        "php": ">= 5.5",
+        "php": ">= 5.4",
         "Nette/Utils": "2.2.3",
         "Nette/Neon": "2.2.3",
         "Nette/Finder": "2.2.0"

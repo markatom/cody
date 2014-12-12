@@ -105,9 +105,9 @@ function buildStructure(array $dir, $prefix = '') {
 
 buildStructure($structure, getcwd());
 
-$mockista = new Registry;
+$registry = new Registry;
 
-$builder = $mockista->createBuilder('Markatom\Cody\Configuration');
+$builder = $registry->createBuilder('Markatom\Cody\Configuration');
 
 $builder->getSources()
 	->andReturn([

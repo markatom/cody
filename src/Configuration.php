@@ -94,16 +94,16 @@ class Configuration extends Object
 		try {
 			return $this->mergeOptions($this->configuration['watchers'][$watcher], $defaults, []);
 
-		} catch (InvalidOption $e) {
+		} catch (InvalidOptionException $e) {
 			$forOption = $e->getMessage();
 			$expected  = $e->getPrevious()->getMessage();
 
-			throw new InvalidOption("Invalid value $forOption of watcher $watcher, $expected.");
+			throw new InvalidOptionException("Invalid value $forOption of watcher $watcher, $expected.");
 
-		} catch (RequiredOption $e) {
+		} catch (RequiredOptionException $e) {
 			$forOption = $e->getMessage();
 
-			throw new RequiredOption("Required value $forOption of watcher $watcher.");
+			throw new RequiredOptionException("Required value $forOption of watcher $watcher.");
 		}
 	}
 
@@ -155,11 +155,11 @@ class Configuration extends Object
 					}
 				}
 
-			} catch (InvalidValue $e) {
-				throw new InvalidOption('for option ' . implode('.', $itemPath), 0, $e);
+			} catch (InvalidValueException $e) {
+				throw new InvalidOptionException('for option ' . implode('.', $itemPath), 0, $e);
 
-			} catch (RequiredValue $e) {
-				throw new RequiredOption('for option ' . implode('.', $itemPath), 0, $e);
+			} catch (RequiredValueException $e) {
+				throw new RequiredOptionException('for option ' . implode('.', $itemPath), 0, $e);
 			}
 		}
 
