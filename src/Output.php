@@ -2,6 +2,7 @@
 
 namespace Markatom\Cody;
 
+use Markatom\Cody\Utils\Position;
 use Markatom\Cody\Utils\Whitespace;
 use Nette\Object;
 use Nette\Utils\Strings;
@@ -27,7 +28,7 @@ class Output extends Object
 
 	private $warningsCount = 0;
 
-	private $violationsCount = 0;
+	private $errorsCount = 0;
 
 	/** @var File[] */
 	private $files = [];
@@ -43,15 +44,12 @@ class Output extends Object
 
 	public function advanceProgress(File $file)
 	{
-		$errors   = count($file->getErrors());
-		$warnings = count($file->getWarnings());
-
-		echo $errors
+		echo $file->errorsCount
 			? "\033[1;37;41mE\033[0m"
-			: ($warnings ? 'W' : '.');
+			: ($file->warningsCount ? 'W' : '.');
 
-		$this->warningsCount   += $warnings;
-		$this->violationsCount += $errors;
+		$this->warningsCount += $file->warningsCount;
+		$this->errorsCount   += $file->errorsCount;
 
 		$this->counter++;
 
@@ -60,7 +58,7 @@ class Output extends Object
 			echo '  ';
 		}
 
-		if ($errors || $warnings) {
+		if ($file->errorsCount || $file->warningsCount) {
 			$this->files[] = $file;
 		}
 	}
@@ -76,11 +74,26 @@ class Output extends Object
 		echo PHP_EOL;
 	}
 
-	public function writeResults()
+	public function writeMessages()
 	{
 		foreach ($this->files as $file) {
 			echo $file->getPath() . PHP_EOL;
+
+			foreach ($file->marks as $marker) {
+				list($line, $column) = Position::offsetToLineAndColumn($marker->offset, $file);
+
+				echo "\t["
+					. $marker->type === Mark::TYPE_ERROR ? '[ERROR at]' : '[WARNING at] '
+					. $line // todo
+					. ':'
+					. $column
+					. "]\t"
+					. $marker->message
+					. PHP_EOL;
+			}
 		}
+
+
 	}
 
 	public function writeSummary()
@@ -88,7 +101,7 @@ class Output extends Object
 		$formatted = number_format($this->runTime, 3);
 
 		echo "Checked $this->totalCount files in $formatted seconds." . PHP_EOL;
-		echo "Found $this->warningsCount warnings and $this->violationsCount violations against coding standards." . PHP_EOL . PHP_EOL;
+		echo "Found $this->warningsCount warnings and $this->errorsCount violations against coding standards." . PHP_EOL . PHP_EOL;
 	}
 
 	public function writeHints()
@@ -102,12 +115,45 @@ class Output extends Object
 		echo '  ' . $this->counter . '/' . $this->totalCount . PHP_EOL;
 	}
 
-	/**
-	 * @param File $file
-	 * @param Marker $marker
-	 * @return array
-	 */
-	public function getMarkerPosition(Marker $marker, File $file)
+	private function prepareMessages(File $file)
+	{
+		$messages = [];
+
+		foreach ($file->errorsCount as $error) {
+			$position = Position::offsetToLineAndColumn($error->offset, $file);
+			$messages[] = [
+				'offset'  => $error->offset,
+				'line'    => $position[0],
+				'column'  => $position[1],
+				'type'    => 'error',
+				'message' => $error->message,
+			];
+		}
+
+		foreach ($file->warnings as $warning) {
+			$position = Position::offsetToLineAndColumn($warning->offset, $file);
+			$messages[] = [
+				'offset'  => $warning->offset,
+				'line'    => $position[0],
+				'column'  => $position[1],
+				'type'    => 'warning',
+				'message' => $warning->message,
+			];
+		}
+
+		usort($markers, function (array $a, array $b) {
+			return $a['offset'] - $b['offset'];
+		});
+
+		return $markers;
+	}
+
+	public function write($string)
+	{
+
+	}
+
+	public function writeLine($string)
 	{
 
 	}

@@ -23,7 +23,7 @@ class Runner extends Object
 	private $readOnly;
 
 	/**
-	 * @var Scanner
+	 * @var Finder
 	 */
 	private $scanner;
 
@@ -35,7 +35,7 @@ class Runner extends Object
     {
 		$this->configuration = $configuration;
 		$this->readOnly      = $readOnly;
-		$this->scanner       = new Scanner($configuration);
+		$this->scanner       = new Finder($configuration);
     }
 
 	public function run()

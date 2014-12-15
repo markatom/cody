@@ -1,17 +1,17 @@
 <?php
 
-use Markatom\Cody\File;
+use Markatom\Cody\Configuration;
 
 require_once __DIR__ . '/InstanceWithoutConstructor.php';
 require_once __DIR__ . '/PropertyAccess.php';
 
 /**
- * File mock with content setting ability.
+ * @todo Fill desc.
  * @author Tomáš Markacz
  */
-class FileMock extends File
+class ConfigurationMock extends Configuration
 {
 
-	use InstanceWithoutConstructor, PropertyAccess;
+    use InstanceWithoutConstructor, PropertyAccess;
 
 }

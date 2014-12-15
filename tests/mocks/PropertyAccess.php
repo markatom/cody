@@ -9,13 +9,18 @@ trait PropertyAccess
 
 	public function _getPropertyReflection($name)
 	{
-		$class = new ReflectionClass($this);
+		$thisClass   = new ReflectionClass($this);
+		$mockedClass = $thisClass->getParentClass();
 
+		$class = $thisClass;
 		while ($class && !$class->hasProperty($name)) {
 			$class = $class->getParentClass();
 		}
 
 		if (!$class) {
+			$class = $mockedClass
+				? $mockedClass
+				: $thisClass;
 			throw new LogicException("Undefined property {$class->getName()}::$$name.");
 		}
 
@@ -29,6 +34,8 @@ trait PropertyAccess
 		$property->setAccessible(TRUE);
 		$property->setValue($this, $value);
 		$property->setAccessible(FALSE);
+
+		return $this;
 	}
 
 	public function _getProperty($name)

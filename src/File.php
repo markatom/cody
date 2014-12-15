@@ -11,6 +11,9 @@ use Nette\Object;
  * @property-read string $path
  * @property-read bool $readOnly
  * @property string $content
+ * @property-read Mark[] $marks
+ * @property-read int $errorsCount
+ * @property-read int $warningsCount
  */
 class File extends Object
 {
@@ -24,11 +27,20 @@ class File extends Object
 	/** @var string */
 	private $content;
 
-	/** @var Marker[] */
-	private $warnings = [];
+	/** @var int */
+	private $contentLength;
 
-	/** @var Marker[] */
-	private $errors = [];
+	/** @var Mark[] */
+	private $marks = [];
+
+	/** @var bool */
+	private $marksSorted = TRUE;
+
+	/** @var int */
+	private $errorsCount = 0;
+
+	/** @var int */
+	private $warningsCount = 0;
 
 	/**
 	 * @param string $path
@@ -44,7 +56,9 @@ class File extends Object
 		if ($this->content === FALSE) {
 			throw new ReadException("Cannot read $path.");
 		}
-    }
+
+		$this->contentLength = strlen($this->content);
+	}
 
 	/**
 	 * @return string
@@ -75,7 +89,8 @@ class File extends Object
 	 */
 	public function setContent($content)
 	{
-		$this->content = $content;
+		$this->content       = $content;
+		$this->contentLength = strlen($content);
 	}
 
 	/**
@@ -85,7 +100,14 @@ class File extends Object
 	 */
 	public function addWarning($offset, $length, $message)
 	{
-		$this->warnings[] = new Marker($offset, $length, $message);
+		if ($offset >= $this->contentLength) {
+			throw new InvalidOffsetException('Invalid offset given.');
+		}
+
+		$this->warningsCount++;
+		$this->marksSorted = FALSE;
+
+		$this->marks[] = new Mark($this, $offset, $length, Mark::TYPE_WARNING, $message);
 	}
 
 	/**
@@ -95,23 +117,51 @@ class File extends Object
 	 */
 	public function addError($offset, $length, $message)
 	{
-		$this->errors[] = new Marker($offset, $length, $message);
+		if ($offset >= $this->contentLength) {
+			throw new InvalidOffsetException('Invalid offset given.');
+		}
+
+		$this->errorsCount++;
+		$this->marksSorted = FALSE;
+
+		$this->marks[] = new Mark($this, $offset, $length, Mark::TYPE_ERROR, $message);
 	}
 
 	/**
-	 * @return Marker[]
+	 * @return Mark[]
 	 */
-	public function getErrors()
+	public function getMarks()
 	{
-		return $this->errors;
+		if (!$this->marksSorted) {
+			$this->sortMarks();
+		}
+
+		return $this->marks;
 	}
 
 	/**
-	 * @return Marker[]
+	 * @return int
 	 */
-	public function getWarnings()
+	public function getErrorsCount()
 	{
-		return $this->warnings;
+		return $this->errorsCount;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getWarningsCount()
+	{
+		return $this->warningsCount;
+	}
+
+	private function sortMarks()
+	{
+		usort($this->marks, function (Mark $a, Mark $b) {
+			return $a->offset - $b->offset;
+		});
+
+		$this->marksSorted = TRUE;
 	}
 
 }

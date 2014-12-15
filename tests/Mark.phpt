@@ -1,6 +1,6 @@
 <?php
 
-use Markatom\Cody\Marker;
+use Markatom\Cody\Mark;
 use Markatom\Cody\Utils\Position;
 use Tester\Assert;
 
@@ -22,29 +22,34 @@ $lineBreaks = [
 
 $tests = [
 	[
-		'offset'        => 0,
-		'windowsOffset' => 0,
-		'expected'      => [1, 1],
+		'offset'         => 0,
+		'windowsOffset'  => 0,
+		'expectedLine'   => 1,
+		'expectedColumn' => 1,
 	],
 	[
-		'offset'        => 92,
-		'windowsOffset' => 93,
-		'expected'      => [2, 36],
+		'offset'         => 92,
+		'windowsOffset'  => 93,
+		'expectedLine'   => 2,
+		'expectedColumn' => 36,
 	],
 	[
-		'offset'        => 169,
-		'windowsOffset' => 171,
-		'expected'      => [3, 37],
+		'offset'         => 169,
+		'windowsOffset'  => 171,
+		'expectedLine'   => 3,
+		'expectedColumn' => 37,
 	],
 	[
-		'offset'        => 170,
-		'windowsOffset' => 173,
-		'expected'      => [4, 1],
+		'offset'         => 170,
+		'windowsOffset'  => 173,
+		'expectedLine'   => 4,
+		'expectedColumn' => 1,
 	],
 	[
-		'offset'        => 244,
-		'windowsOffset' => 247,
-		'expected'      => [4, 75],
+		'offset'         => 244,
+		'windowsOffset'  => 247,
+		'expectedLine'   => 4,
+		'expectedColumn' => 75,
 	],
 ];
 
@@ -58,6 +63,9 @@ foreach ($lineBreaks as $lineBreak) {
 			? $test['windowsOffset']
 			: $test['offset'];
 
-		Assert::equal($test['expected'], Position::offsetToLineAndColumn($offset, $file));
+		$mark = new Mark($file, $offset, 0, 0, '');
+
+		Assert::equal($test['expectedLine'], $mark->getLine());
+		Assert::equal($test['expectedColumn'], $mark->getColumn());
 	}
 }

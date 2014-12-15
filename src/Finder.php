@@ -9,7 +9,7 @@ use Nette\Utils\Finder;
  * @todo Fill desc.
  * @author Tomáš Markacz
  */
-class Scanner extends Object
+class Finder extends Object
 {
 
 	/**

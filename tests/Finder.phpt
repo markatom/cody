@@ -1,11 +1,11 @@
 <?php
 
-use Markatom\Cody\Scanner;
-use Mockista\Registry;
+use Markatom\Cody\Finder;
 use Nette\Utils\FileSystem;
 use Tester\Assert;
 
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/mocks/ConfigurationMock.php';
 
 $structure = [
 	'dir' => [
@@ -105,33 +105,27 @@ function buildStructure(array $dir, $prefix = '') {
 
 buildStructure($structure, getcwd());
 
-$registry = new Registry;
-
-$builder = $registry->createBuilder('Markatom\Cody\Configuration');
-
-$builder->getSources()
-	->andReturn([
-		'dir/',
-		'!*.ignore.php',
-		'dir.php/',
-		'*Pattern.php',
-		'foo*qux.php',
-		'foo/**/qux.php',
-		'**/ipsum/dolor.php',
-		'from/root.php',
-		'/inRoot.php',
-		'return/all/**',
+$configuration = ConfigurationMock::_createWithoutConstructor()
+	->_setProperty('configuration', [
+		'sources' => [
+			'dir/',
+			'!*.ignore.php',
+			'dir.php/',
+			'*Pattern.php',
+			'foo*qux.php',
+			'foo/**/qux.php',
+			'**/ipsum/dolor.php',
+			'from/root.php',
+			'/inRoot.php',
+			'return/all/**',
+		],
+		'extensions' => [
+			'php',
+			'phpt',
+		],
 	]);
 
-$builder->getExtensions()
-	->andReturn([
-		'php',
-		'phpt',
-	]);
-
-$configuration = $builder->getMock();
-
-$files = new Scanner($configuration);
+$files = new Finder($configuration);
 
 $actual = $files->getFiles();
 sort($actual);
