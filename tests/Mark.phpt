@@ -5,7 +5,7 @@ use Markatom\Cody\Utils\Position;
 use Tester\Assert;
 
 require_once __DIR__ . '/bootstrap.php';
-require_once __DIR__ . '/mocks/FileMock.php';
+require_once __DIR__ . '/stubs/FileStub.php';
 
 $lines = [
 	'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -54,7 +54,7 @@ $tests = [
 ];
 
 foreach ($lineBreaks as $lineBreak) {
-	$file = FileMock::_createWithoutConstructor();
+	$file = FileStub::createWithoutConstructor();
 
 	$file->setContent(implode($lineBreak, $lines));
 

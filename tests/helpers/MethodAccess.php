@@ -7,7 +7,7 @@
 trait MethodAccess
 {
 
-	public function _getMethodReflection($name)
+	public function getMethodReflection($name)
 	{
 		$thisClass   = new ReflectionClass($this);
 		$mockedClass = $thisClass->getParentClass();
@@ -27,9 +27,9 @@ trait MethodAccess
 		return $class->getMethod($name);
 	}
 
-	public function _callMethod($name, array $arguments = [])
+	public function callMethod($name, array $arguments = [])
 	{
-		$method = $this->_getMethodReflection($name);
+		$method = $this->getMethodReflection($name);
 
 		$method->setAccessible(TRUE);
 		$return = $method->invokeArgs($this, $arguments);

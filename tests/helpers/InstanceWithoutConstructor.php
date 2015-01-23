@@ -10,7 +10,7 @@ trait InstanceWithoutConstructor
 	/**
 	 * @return $this
 	 */
-	public static function _createWithoutConstructor()
+	public static function createWithoutConstructor()
 	{
 		$reflection = new ReflectionClass(get_called_class());
 

@@ -3,7 +3,7 @@
 namespace Markatom\Cody;
 
 use Nette\Object;
-use Nette\Utils\Finder;
+use Nette\Utils\Finder as NetteFinder;
 
 /**
  * @todo Fill desc.
@@ -13,34 +13,23 @@ class Finder extends Object
 {
 
 	/**
-	 * @var Configuration
-	 */
-	private $configuration;
-
-	/**
-	 * @param Configuration $configuration
-	 */
-    public function __construct(Configuration $configuration)
-    {
-        $this->configuration = $configuration;
-    }
-
-	/**
+	 * @param string[] $extensions
+	 * @param string[] $masks
 	 * @return string[]
 	 */
-	public function getFiles()
+	public function findFiles(array $extensions, array $masks)
 	{
 		$extensions = array_map(function ($extension) {
 			return '*.' . $extension;
-		}, $this->configuration->getExtensions());
+		}, $extensions);
 
 		$result = $found = [];
 
-		foreach (Finder::find($extensions)->from('.') as $name => $file) {
+		foreach (NetteFinder::find($extensions)->from('.') as $name => $file) {
 			$found[] = substr($name, 1); // remove .
 		}
 
-		foreach ($this->configuration->getSources() as $mask) {
+		foreach ($masks as $mask) {
 			if (substr($mask, 0, 1) === '!') {
 				$pattern = $this->maskToPattern(substr($mask, 1));
 				foreach ($result as $index => $name) {

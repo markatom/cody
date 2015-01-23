@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$logo = <<<END
+$logo = <<<'END'
   .   .
   |\_/|
  / - ^ \  CODY the fox
@@ -11,7 +11,7 @@ $logo = <<<END
 
 END;
 
-$help = <<<END
+$help = <<<'END'
 \033[1mUSAGE:
     \033[1mcody\033[0m check [-h | --help] [-d | --details] [ -s | --summary] |
          fix [-h | --help] [-d | --details] [ -s | --summary]

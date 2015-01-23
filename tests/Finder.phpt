@@ -3,9 +3,10 @@
 use Markatom\Cody\Finder;
 use Nette\Utils\FileSystem;
 use Tester\Assert;
+use Tester\Helpers;
 
 require_once __DIR__ . '/bootstrap.php';
-require_once __DIR__ . '/mocks/ConfigurationMock.php';
+require_once __DIR__ . '/stubs/ConfigurationStub.php';
 
 $structure = [
 	'dir' => [
@@ -86,8 +87,7 @@ $structure = [
 ];
 
 $testDir = __DIR__ . '/../temp/tests/Files';
-FileSystem::delete($testDir);
-FileSystem::createDir($testDir);
+Helpers::purge($testDir);
 chdir($testDir);
 
 function buildStructure(array $dir, $prefix = '') {
@@ -105,8 +105,8 @@ function buildStructure(array $dir, $prefix = '') {
 
 buildStructure($structure, getcwd());
 
-$configuration = ConfigurationMock::_createWithoutConstructor()
-	->_setProperty('configuration', [
+$configuration = ConfigurationStub::createWithoutConstructor()
+	->setProperty('configuration', [
 		'sources' => [
 			'dir/',
 			'!*.ignore.php',

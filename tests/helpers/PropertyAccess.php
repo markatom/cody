@@ -7,7 +7,7 @@
 trait PropertyAccess
 {
 
-	public function _getPropertyReflection($name)
+	public function getPropertyReflection($name)
 	{
 		$thisClass   = new ReflectionClass($this);
 		$mockedClass = $thisClass->getParentClass();
@@ -27,9 +27,9 @@ trait PropertyAccess
 		return $class->getProperty($name);
 	}
 
-    public function _setProperty($name, $value)
+	public function setProperty($name, $value)
 	{
-		$property = $this->_getPropertyReflection($name);
+		$property = $this->getPropertyReflection($name);
 
 		$property->setAccessible(TRUE);
 		$property->setValue($this, $value);
@@ -38,9 +38,9 @@ trait PropertyAccess
 		return $this;
 	}
 
-	public function _getProperty($name)
+	public function getProperty($name)
 	{
-		$property = $this->_getPropertyReflection($name);
+		$property = $this->getPropertyReflection($name);
 
 		$property->setAccessible(TRUE);
 		$value = $property->getValue($this);

@@ -9,6 +9,11 @@ use Nette\Utils\Arrays;
 /**
  * @todo Fill desc.
  * @author Tomáš Markacz
+ *
+ * @property-read array $extensions
+ * @property-read array $sources
+ * @property-read array $preprocessors
+ * @property-read array $watchers
  */
 class Configuration extends Object
 {

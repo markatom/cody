@@ -26,3 +26,5 @@ class RequiredOptionException extends LogicException { }
 class ReadException extends RuntimeException { }
 
 class InvalidOffsetException extends LogicException { }
+
+class InvalidLengthException extends LogicException { }

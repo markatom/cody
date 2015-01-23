@@ -3,7 +3,6 @@
 namespace Markatom\Cody;
 
 use Nette\Object;
-use Nette\Utils\Finder;
 
 /**
  * @todo Fill desc.
@@ -25,7 +24,7 @@ class Runner extends Object
 	/**
 	 * @var Finder
 	 */
-	private $scanner;
+	private $finder;
 
 	/**
 	 * @param Configuration $configuration
@@ -35,22 +34,25 @@ class Runner extends Object
     {
 		$this->configuration = $configuration;
 		$this->readOnly      = $readOnly;
-		$this->scanner       = new Finder($configuration);
+		$this->finder        = new Finder;
     }
 
 	public function run()
 	{
-		$output = new Output;
+		$output = new Output(STDOUT, TRUE); // todo: formatting
 
-		$files = $this->scanner->getFiles();
+		$files = $this->finder->findFiles($this->configuration->extensions, $this->configuration->sources);
 
-		$output->startProgress(count($files));
+		$progress = new Progress($output);
+
+		$progress->start(count($files));
 
 		foreach ($files as $file) {
-			$file      = new File($file, $this->readOnly);
+			$content   = file_get_contents($file);
+			$file      = new File($content, $file, $this->readOnly);
 			$tokenizer = new Tokenizer($file);
 
-			foreach ($this->configuration->getWatchers() as $watcher) {
+			foreach ($this->configuration->watchers as $watcher) {
 				if (!class_exists($watcher)) {
 					throw new WatcherNotFoundException($watcher);
 				}
@@ -60,28 +62,24 @@ class Runner extends Object
 				}
 
 				/** @var Watcher $watcher */
-				$watcher = new $watcher($file, $this->configuration->getWatcherOptions($watcher));
+				$watcher = new $watcher($file, $this->configuration->getWatcherOptions($watcher), $watcher->definedOptions());
 
-				foreach ($watcher->getWatchedTokens() as $token => $method) {
+				foreach ($watcher->watchedTokens as $token => $method) {
 					$tokenizer->reset();
 
-					while (TRUE) {
-						try {
+					try {
+						while (TRUE) {
 							$tokenizer->moveNext($token);
-
 							$watcher->$method($tokenizer);
-
-						} catch (InvalidMoveException $e) {
-							break;
 						}
-					}
+					} catch (InvalidMoveException $e) { }
 				}
 
-				$output->advanceProgress($result);
+				$progress->advance($file);
 			}
 		}
 
-		$output->finishProgress();
+		$progress->finish();
 	}
 
 }

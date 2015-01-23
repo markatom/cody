@@ -6,6 +6,9 @@ use Nette\Object;
 
 /**
  * @author Tomáš Markacz
+ *
+ * @property-read array $watchedTokens
+ * @property-read array $options
  */
 abstract class Watcher extends Object
 {
@@ -18,7 +21,10 @@ abstract class Watcher extends Object
 
 	private $result;
 
-	public final function __construct($file, array $options, $readOnly)
+	/** @var Tokenizer */
+	protected $tokenizer;
+
+	public final function __construct(File $file, array $options, $readOnly)
 	{
 		$this->file     = $file;
 		$this->options  = $options;
@@ -30,14 +36,21 @@ abstract class Watcher extends Object
 	/**
 	 * @return array
 	 */
-	public abstract function getWatchedTokens();
+	public abstract function watchedTokens();
 
-	public final function addWarning(Token $token, $message)
+	/**
+	 * @return array
+	 */
+	public function definedOptions()
 	{
-		$this->output->addWarning($message);
+		return [];
 	}
 
-	public final function addError(Token $token, $message)
+	/**
+	 * @param Token|JoinedTokens $token
+	 * @param string $message
+	 */
+	public final function addError($token, $message)
 	{
 		trigger_error('Not Implemented!', E_USER_WARNING);
 	}

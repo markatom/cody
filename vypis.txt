@@ -1,0 +1,23 @@
+ERROR in app/module/umgr/model/service/FooBarService.php at line 1, column 1:
+File containing php code only must be opened right in the begining
+
+
+ <?php
+
+ERROR in app/module/umgr/model/service/FooBarService.php at line 32, column 10:
+Equals sign not aligned with surrounding assignments
+
+ $foo = 'bar';
+ $foobar = 'test;
+
+
+
+ERROR 259:22 Missing function doc comment
+
+Details for tests/LoremIpsum.phpt:
+WARNING     1   1 File containing php code only must be opened right in the
+                  begining of the file
+FIXED     134  32 Class name must be in camelCase
+ERROR     259   2 Missing function doc comment
+ERROR   12049 101 Line too long
+

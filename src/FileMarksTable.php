@@ -21,7 +21,7 @@ class FileMarksTable extends Object
 	private $file;
 
 	private static $types = [
-		Mark::TYPE_ERROR => 'ERROR',
+		Mark::TYPE_ERROR   => 'ERROR',
 		Mark::TYPE_WARNING => 'WARNING'
 	];
 

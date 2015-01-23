@@ -6,7 +6,7 @@ use Markatom\Cody\Output;
  * @todo Fill desc.
  * @author Tomáš Markacz
  */
-class OutputMock extends Output
+class _OutputStub extends Output
 {
 
 	/** @var string */

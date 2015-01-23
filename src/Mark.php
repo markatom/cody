@@ -10,12 +10,14 @@ use Nette\Utils\Strings;
  * @todo Fill desc.
  * @author Tomáš Markacz
  *
+ * @property-read File $file
  * @property-read int $offset
  * @property-read int $line
  * @property-read int $column
  * @property-read int $length
  * @property-read int $type
  * @property-read string $text
+ * @property-read string $marked
  */
 class Mark extends Object
 {
@@ -27,6 +29,9 @@ class Mark extends Object
 		[^\n\r]*  # must not contain any line break characters
 		$         # anchored to the end of string
 	~xD'; // D modifier forces $ anchor to match only end of string
+
+	/** @var File */
+	private $file;
 
 	/** @var int */
 	private $offset;
@@ -46,6 +51,9 @@ class Mark extends Object
 	/** @var string */
 	private $text;
 
+	/** @var string */
+	private $marked;
+
 	/**
 	 * @param File $file
 	 * @param int $offset
@@ -55,13 +63,23 @@ class Mark extends Object
 	 */
     public function __construct(File $file, $offset, $length, $type, $text)
     {
+		$this->file   = $file;
 		$this->offset = $offset;
 		$this->length = $length;
 		$this->type   = $type;
 		$this->text   = $text;
+		$this->marked = substr($file->content, $offset, $length);
 
 		list ($this->line, $this->column) = $this->offsetToLineAndColumn($offset, $file);
     }
+
+	/**
+	 * @return File
+	 */
+	public function getFile()
+	{
+		return $this->file;
+	}
 
 	/**
 	 * @return int
@@ -111,6 +129,11 @@ class Mark extends Object
 		return $this->text;
 	}
 
+	public function getMarked()
+	{
+		return $this->marked;
+	}
+
 	/**
 	 * @param int $offset
 	 * @param File $file
@@ -118,7 +141,7 @@ class Mark extends Object
 	 */
 	private function offsetToLineAndColumn($offset, File $file)
 	{
-		$previous = (string) substr($file->content, 0, $offset); // force result to be string if an empty content given
+		$previous = (string) substr($file->originalContent, 0, $offset); // force result to be string if an empty content given
 
 		$line = Whitespace::countLineBreaks($previous) + 1;
 

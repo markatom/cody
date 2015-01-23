@@ -7,6 +7,8 @@ use Nette\Object;
 /**
  * @todo Fill desc.
  * @author Tomáš Markacz
+ *
+ * @property-read File $file
  */
 class Tokenizer extends Object
 {
@@ -14,15 +16,14 @@ class Tokenizer extends Object
 	/** @var File */
 	private $file;
 
-	/**
-	 * @var Token[]
-	 */
+	/** @var Token[] */
 	private $tokens = [];
 
-	/**
-	 * @var int
-	 */
-	private $current = 0;
+	/** @var int */
+	private $end;
+
+	/** @var int */
+	private $position;
 
 	/**
 	 * @param File $file
@@ -34,11 +35,6 @@ class Tokenizer extends Object
 		$this->tokenize();
 	}
 
-	public function reset()
-	{
-		$this->current = 0;
-	}
-
 	/**
 	 * @return File
 	 */
@@ -48,184 +44,125 @@ class Tokenizer extends Object
 	}
 
 	/**
+	 * @return Token
+	 */
+	public function first()
+	{
+		return $this->tokens[$this->position = 0];
+	}
+
+	/**
+	 * @return Token
+	 */
+	public function last()
+	{
+		return $this->tokens[$this->position = $this->end];
+	}
+
+	/**
+	 * @return Token
+	 */
+	public function current()
+	{
+		return $this->tokens[$this->position];
+	}
+
+	/**
+	 * @param array|int|string $search
+	 * @param array|int|string $skip
 	 * @return Token|NULL
 	 */
-	public function getCurrent()
+	public function previous($search = NULL, $skip = NULL)
 	{
-		return isset($this->tokens[$this->current])
-			? $this->tokens[$this->current]
-			: NULL;
+		return $this->proceed($search, $skip, FALSE); // FALSE for backward
 	}
 
 	/**
-	 * @param  int $searchToken
+	 * @param array|int|string $search
+	 * @param array|int|string $skip
 	 * @return Token|NULL
 	 */
-	public function getPrev($searchToken = NULL)
+	public function next($search = NULL, $skip = NULL)
 	{
-		if ($searchToken) {
-			for ($i = $this->current - 1; $i >= 0; $i--) {
-				if ($this->tokens[$i]->type === $searchToken) {
-					return $this->tokens[$i];
-				}
-			}
-
-			return NULL;
-
-		} else {
-			if ($this->current === 0) {
-				return NULL;
-			}
-
-			return $this->tokens[$this->current - 1];
-		}
+		return $this->proceed($search, $skip, TRUE); // TRUE for forward
 	}
 
 	/**
-	 * @param  int $searchToken
-	 * @return Token|NULL
+	 * @param array|int|string $search
+	 * @param array|int|string $skip
+	 * @return JoinedTokens|NULL
 	 */
-	public function getNext($searchToken = NULL)
+	public function joinPreviousUntil($search = NULL, $skip = NULL)
 	{
-		if ($searchToken) {
-			for ($i = $this->current + 1, $count = count($this->tokens); $i < $count; $i++) {
-				if ($this->tokens[$i]->type === $searchToken) {
-					return $this->tokens[$i];
-				}
-			}
-
-			return NULL;
-
-		} else {
-			if ($this->current === count($this->tokens) - 1) {
-				return NULL;
-			}
-
-			return $this->tokens[$this->current + 1];
-		}
+		return $this->proceed($search, $skip, FALSE, TRUE); // TRUE for backward, FALSE for join
 	}
 
 	/**
-	 * @param  int $searchToken
-	 * @return self
-	 * @throws InvalidMoveException
+	 * @param array|int|string $search
+	 * @param array|int|string $skip
+	 * @return JoinedTokens|NULL
 	 */
-	public function movePrev($searchToken = NULL)
+	public function joinNextUntil($search = NULL, $skip = NULL)
 	{
-		if ($searchToken) {
-			for ($this->current--; $this->current >= 0; $this->current--) {
-				if ($this->tokens[$this->current]->type === $searchToken) {
-					return $this;
-				}
-			}
-
-			throw new InvalidMoveException('Cannot move to previous token ' . $this->getTokenName($searchToken) . '.');
-
-		} else {
-			if ($this->current === 0) {
-				throw new InvalidMoveException('Cannot move to previous token.');
-			}
-
-			$this->current--;
-
-			return $this;
-		}
-	}
-
-	/**
-	 * @param int $searchToken
-	 * @return self
-	 * @throws InvalidMoveException
-	 */
-	public function moveNext($searchToken = NULL)
-	{
-		if ($searchToken) {
-			for ($this->current++, $count = count($this->tokens); $this->current < $count; $this->current++) {
-				if ($this->tokens[$this->current]->type === $searchToken) {
-					return $this;
-				}
-			}
-
-			throw new InvalidMoveException('Cannot move to next token ' . $this->getTokenName($searchToken) . '.');
-
-		} else {
-			if ($this->current === count($this->tokens) - 1) {
-				throw new InvalidMoveException('Cannot move to next token.');
-			}
-
-			$this->current++;
-
-			return $this;
-		}
-	}
-
-	/**
-	 * @param $content
-	 * @return self
-	 */
-	public function insertBeforeCurrent($content)
-	{
-		$this->assumeWritable();
-
-		$cut    = $this->tokens[$this->current]->offset;
-		$offset = $cut + strlen($content);
-
-		$this->file->content = substr($this->file->content, 0, $cut) . $content . substr($this->file->content, $cut);
-
-		$this->tokenize();
-
-		for (; $this->tokens[$this->current]->offset !== $offset; $this->current++);
-
-		return $this;
+		return $this->proceed($search, $skip, TRUE, TRUE); // TRUE twice for forward and join
 	}
 
 	/**
 	 * @param string $content
-	 * @return self
 	 */
-	public function insertAfterCurrent($content)
+	public function prepend($content)
 	{
-		$this->assumeWritable();
+		$this->assertWritable();
 
-		$current = $this->tokens[$this->current];
-		$cut     = $current->offset + strlen($current->content);
+		$offset = $this->tokens[$this->position]->offset;
 
-		$this->file->content = substr($this->file->content, 0, $cut) . $content . substr($this->file->content, $cut);
+		$this->file->modifyContent($offset, 0, $content);
 
 		$this->tokenize();
 
-		return $this;
+		$shifted = $offset + strlen($content);
+
+		for (; $this->tokens[$this->position]->offset < $shifted; $this->position++); // move to the original position
 	}
 
 	/**
-	 * @param  string $content XXX
-	 * @return self
+	 * @param string $content
 	 */
-	public function replaceCurrent($content)
+	public function append($content)
 	{
-		$this->assumeWritable();
+		$this->assertWritable();
 
-		$current = $this->tokens[$this->current];
+		$current = $this->tokens[$this->position];
+		$offset  = $current->offset + $current->length;
 
-		$this->file->content = substr($this->file->content, 0, $current->offset) . $content . substr($this->file->content, $current->offset + strlen($current->content));
+		$this->file->modifyContent($offset, 0, $content);
+
+		$this->tokenize();
+	}
+
+	/**
+	 * @param string $content
+	 */
+	public function replace($content)
+	{
+		$this->assertWritable();
+
+		$current = $this->tokens[$this->position];
+
+		$this->file->modifyContent($current->offset, $current->length, $content);
 
 		$this->tokenize();
 
-		if (!isset($this->tokens[$this->current])) {
-			$this->current = count($this->tokens) - 1;
+		if (!isset($this->tokens[$this->position])) {
+			$this->position = $this->end;
 		}
-
-		return $this;
 	}
 
 	/**
-	 * @return self
 	 */
-	public function removeCurrent()
+	public function remove()
 	{
-		$this->replaceCurrent('');
-
-		return $this;
+		$this->replace('');
 	}
 
 	/**
@@ -233,10 +170,13 @@ class Tokenizer extends Object
 	private function tokenize()
 	{
 		$offset = 0;
-		$this->tokens = [];
+		$tokens = token_get_all($this->file->content);
 
-		foreach (token_get_all($this->file->content) as $token) {
-			list($type, $content) = count($token) === 1
+		$this->tokens = [];
+		$this->end    = count($tokens);
+
+		foreach ($tokens as $token) {
+			list($type, $content) = is_string($token)
 				? [$token, $token]
 				: $token;
 
@@ -246,24 +186,47 @@ class Tokenizer extends Object
 	}
 
 	/**
-	 * @throws ReadOnlyException
+	 * @param array|int|string $search
+	 * @param array|int|string $skip
+	 * @param bool $forward
+	 * @param bool $join
+	 * @return JoinedTokens|Token|NULL
 	 */
-	private function assumeWritable()
+	private function proceed($search, $skip, $forward, $join = FALSE)
 	{
-		if ($this->file->readOnly) {
-			throw new ReadOnlyException(get_called_class());
+		$delta   = $forward ? 1 : -1;
+		$skipped = [];
+
+		for ($i = $this->position + $delta; 0 <= $i && $i <= $this->end; $i += $delta) {
+			if (!$search) {
+				return $this->tokens[$this->position = $i];
+
+			} elseif ($this->tokens[$i]->is($search)) {
+				$this->position = $i;
+
+				return $join
+					? new JoinedTokens($skipped)
+					: $this->tokens[$i];
+
+			} elseif ($skip && !$this->tokens[$i]->is($skip)) {
+				break;
+
+			}
+
+			$skipped[] = $this->tokens[$i];
 		}
+
+		return NULL;
 	}
 
 	/**
-	 * @param int|string $tokenType
-	 * @return string
+	 * @throws ReadOnlyException
 	 */
-	private function getTokenName($tokenType)
+	private function assertWritable()
 	{
-		return is_int($tokenType)
-			? token_name($tokenType)
-			: $tokenType;
+		if ($this->file->readOnly) {
+			throw new ReadOnlyException;
+		}
 	}
 
 }
