@@ -1,6 +1,6 @@
 <?php
 
-use Markatom\Cody\File;
+use Markatom\Cody\SourceCode;
 
 require_once __DIR__ . '/../helpers/InstanceWithoutConstructor.php';
 require_once __DIR__ . '/../helpers/PropertyAccess.php';
@@ -9,7 +9,7 @@ require_once __DIR__ . '/../helpers/PropertyAccess.php';
  * File mock with content setting ability.
  * @author Tomáš Markacz
  */
-class _FileStub extends File
+class _SourceCodeStub extends SourceCode
 {
 
 	use InstanceWithoutConstructor, PropertyAccess;

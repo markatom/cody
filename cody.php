@@ -1,12 +1,23 @@
 <?php
 
+use Markatom\Cody\Configuration;
+use Markatom\Cody\File;
+use Markatom\Cody\Finder;
+use Markatom\Cody\Output;
+use Markatom\Cody\Runner;
+
 require_once __DIR__ . '/vendor/autoload.php';
 
+require_once __DIR__ . '/vendor/markatom/watchers/src/Boolean.php';
+require_once __DIR__ . '/vendor/markatom/watchers/src/Keyword.php';
+require_once __DIR__ . '/vendor/markatom/watchers/src/Naming.php';
+require_once __DIR__ . '/vendor/markatom/watchers/src/Null.php';
+
 $logo = <<<'END'
-  .   .
+  *   *
   |\_/|
- / - ^ \  CODY the fox
- ~~o O~~  version 0.1.0
+ / - ^ \  CODY v0.1.0
+ ~~o O~~  using cs.neon
    \@/
 
 END;
@@ -39,30 +50,6 @@ END;
 
 echo $logo . PHP_EOL;
 
-$output = new \Markatom\Cody\Output();
+$runner = new Runner(new Configuration(new File('cs.neon')), new Finder, new Output(STDOUT, TRUE), TRUE);
 
-$output->startProgress(256);
-
-for ($i = 0; $i < 256; $i++) {
-	$result = new \Markatom\Cody\Result('foo');
-
-	switch(rand(0, 40)) {
-		case 0:
-			$result->addViolation(new \Markatom\Cody\Token(0, 0, 'Lorem Ipsum dolor sit amet'), '');
-			break;
-
-		case 1:
-			$result->addWarning(new \Markatom\Cody\Token(0, 0, ''), '');
-			break;
-	}
-
-	$output->advanceProgress($result);
-
-	usleep(10000);
-}
-
-$output->finishProgress();
-$output->writeSummary();
-$output->writeHints();
-
-var_dump(((function_exists('posix_isatty') && posix_isatty(STDOUT)) || getenv('ConEmuANSI') === 'ON' || getenv('ANSICON') !== FALSE));
+$runner->run();

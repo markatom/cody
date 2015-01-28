@@ -83,6 +83,10 @@ class Token extends Object
 	}
 
 	/**
+	 * Checks if token matches the given criteria.
+	 * Token must be type of the given criteria if it is an integer (T_* constant for token).
+	 * Token content must be given criteria if it is an string, comparison is case insensitive.
+	 * If the criteria is an array, at least one of its items must match according to mentioned rules.
 	 * @param array|int|string $criteria
 	 * @return bool
 	 */

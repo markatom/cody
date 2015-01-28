@@ -39,7 +39,7 @@ class Whitespace extends Object
 	 */
 	public static function toLines($string)
 	{
-		return preg_split(self::LINE_BREAK_PATTERN, $string);
+		return Strings::split($string, self::LINE_BREAK_PATTERN);
 	}
 
 	/**

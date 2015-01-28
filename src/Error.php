@@ -10,28 +10,24 @@ use Nette\Utils\Strings;
  * @todo Fill desc.
  * @author Tomáš Markacz
  *
- * @property-read File $file
+ * @property-read SourceCode $source
  * @property-read int $offset
  * @property-read int $line
  * @property-read int $column
  * @property-read int $length
- * @property-read int $type
  * @property-read string $text
  * @property-read string $marked
  */
-class Mark extends Object
+class Error extends Object
 {
-
-	const TYPE_ERROR   = 1;
-	const TYPE_WARNING = 2;
 
 	const LAST_LINE_PATTERN = '~
 		[^\n\r]*  # must not contain any line break characters
-		$         # anchored to the end of string
-	~xD'; // D modifier forces $ anchor to match only end of string
+		$         # anchored to the end of a string
+	~xD'; // D modifier forces $ to match only end of string
 
-	/** @var File */
-	private $file;
+	/** @var SourceCode */
+	private $source;
 
 	/** @var int */
 	private $offset;
@@ -45,9 +41,6 @@ class Mark extends Object
 	/** @var int */
 	private $length;
 
-	/** @var int */
-	private $type;
-
 	/** @var string */
 	private $text;
 
@@ -55,30 +48,28 @@ class Mark extends Object
 	private $marked;
 
 	/**
-	 * @param File $file
+	 * @param SourceCode $source
 	 * @param int $offset
 	 * @param int $length
-	 * @param int $type
 	 * @param string $text
 	 */
-    public function __construct(File $file, $offset, $length, $type, $text)
+    public function __construct(SourceCode $source, $offset, $length, $text)
     {
-		$this->file   = $file;
+		$this->source = $source;
 		$this->offset = $offset;
 		$this->length = $length;
-		$this->type   = $type;
 		$this->text   = $text;
-		$this->marked = substr($file->content, $offset, $length);
+		$this->marked = Strings::substring($source->content, $offset, $length);
 
-		list ($this->line, $this->column) = $this->offsetToLineAndColumn($offset, $file);
+		list ($this->line, $this->column) = $this->offsetToLineAndColumn($offset, $source);
     }
 
 	/**
-	 * @return File
+	 * @return SourceCode
 	 */
-	public function getFile()
+	public function getSource()
 	{
-		return $this->file;
+		return $this->source;
 	}
 
 	/**
@@ -114,14 +105,6 @@ class Mark extends Object
 	}
 
 	/**
-	 * @return int
-	 */
-	public function getType()
-	{
-		return $this->type;
-	}
-
-	/**
 	 * @return string
 	 */
 	public function getText()
@@ -136,12 +119,12 @@ class Mark extends Object
 
 	/**
 	 * @param int $offset
-	 * @param File $file
+	 * @param SourceCode $source
 	 * @return array
 	 */
-	private function offsetToLineAndColumn($offset, File $file)
+	private function offsetToLineAndColumn($offset, SourceCode $source)
 	{
-		$previous = (string) substr($file->originalContent, 0, $offset); // force result to be string if an empty content given
+		$previous = (string) substr($source->getContent(), 0, $offset); // force result to be string if an empty content given
 
 		$line = Whitespace::countLineBreaks($previous) + 1;
 

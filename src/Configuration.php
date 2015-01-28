@@ -34,17 +34,11 @@ class Configuration extends Object
 	];
 
 	/**
-	 * @param string $file
+	 * @param File $file
 	 */
-    public function __construct($file)
+    public function __construct(File $file)
     {
-		$contents = @file_get_contents($file); // intentionally @
-
-		if ($contents === FALSE) {
-			throw new ConfigurationFileNotFoundException($file);
-		}
-
-        $configuration = (array) Neon::decode($contents);
+        $configuration = (array) Neon::decode($file->content);
 
 		foreach (self::$defaults as $key => $value) {
 			if (!isset($configuration[$key])) {
@@ -99,16 +93,9 @@ class Configuration extends Object
 		try {
 			return $this->mergeOptions($this->configuration['watchers'][$watcher], $defaults, []);
 
-		} catch (InvalidOptionException $e) {
-			$forOption = $e->getMessage();
-			$expected  = $e->getPrevious()->getMessage();
-
-			throw new InvalidOptionException("Invalid value $forOption of watcher $watcher, $expected.");
-
-		} catch (RequiredOptionException $e) {
-			$forOption = $e->getMessage();
-
-			throw new RequiredOptionException("Required value $forOption of watcher $watcher.");
+		} catch (OptionException $e) {
+			$e->watcher = $watcher;
+			throw $e;
 		}
 	}
 
@@ -160,11 +147,9 @@ class Configuration extends Object
 					}
 				}
 
-			} catch (InvalidValueException $e) {
-				throw new InvalidOptionException('for option ' . implode('.', $itemPath), 0, $e);
-
-			} catch (RequiredValueException $e) {
-				throw new RequiredOptionException('for option ' . implode('.', $itemPath), 0, $e);
+			} catch (OptionException $e) {
+				$e->option = implode('.', $itemPath);
+				throw $e;
 			}
 		}
 

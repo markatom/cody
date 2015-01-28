@@ -46,6 +46,13 @@ class Output extends Object
 		$this->write($string . PHP_EOL);
 	}
 
+	/**
+	 */
+	public function writeBlankLine()
+	{
+		$this->writeLine('');
+	}
+
 	private function format($string)
 	{
 		if (!$this->formatting) {

@@ -8,13 +8,13 @@ use Nette\Object;
  * @todo Fill desc.
  * @author Tomáš Markacz
  *
- * @property-read File $file
+ * @property-read SourceCode $source
  */
 class Tokenizer extends Object
 {
 
-	/** @var File */
-	private $file;
+	/** @var SourceCode */
+	private $source;
 
 	/** @var Token[] */
 	private $tokens = [];
@@ -26,21 +26,21 @@ class Tokenizer extends Object
 	private $position;
 
 	/**
-	 * @param File $file
+	 * @param SourceCode $source
 	 */
-	public function __construct(File $file)
+	public function __construct(SourceCode $source)
 	{
-		$this->file = $file;
+		$this->source = $source;
 
 		$this->tokenize();
 	}
 
 	/**
-	 * @return File
+	 * @return SourceCode
 	 */
-	public function getFile()
+	public function getSource()
 	{
-		return $this->file;
+		return $this->source;
 	}
 
 	/**
@@ -94,7 +94,7 @@ class Tokenizer extends Object
 	 */
 	public function joinPreviousUntil($search = NULL, $skip = NULL)
 	{
-		return $this->proceed($search, $skip, FALSE, TRUE); // TRUE for backward, FALSE for join
+		return $this->proceed($search, $skip, FALSE, TRUE); // FALSE for backward, TRUE for join
 	}
 
 	/**
@@ -116,7 +116,7 @@ class Tokenizer extends Object
 
 		$offset = $this->tokens[$this->position]->offset;
 
-		$this->file->modifyContent($offset, 0, $content);
+		$this->source->modifyContent($offset, 0, $content);
 
 		$this->tokenize();
 
@@ -135,7 +135,7 @@ class Tokenizer extends Object
 		$current = $this->tokens[$this->position];
 		$offset  = $current->offset + $current->length;
 
-		$this->file->modifyContent($offset, 0, $content);
+		$this->source->modifyContent($offset, 0, $content);
 
 		$this->tokenize();
 	}
@@ -149,7 +149,7 @@ class Tokenizer extends Object
 
 		$current = $this->tokens[$this->position];
 
-		$this->file->modifyContent($current->offset, $current->length, $content);
+		$this->source->modifyContent($current->offset, $current->length, $content);
 
 		$this->tokenize();
 
@@ -170,10 +170,10 @@ class Tokenizer extends Object
 	private function tokenize()
 	{
 		$offset = 0;
-		$tokens = token_get_all($this->file->content);
+		$tokens = token_get_all($this->source->content);
 
 		$this->tokens = [];
-		$this->end    = count($tokens);
+		$this->end    = count($tokens) - 1;
 
 		foreach ($tokens as $token) {
 			list($type, $content) = is_string($token)
@@ -224,7 +224,7 @@ class Tokenizer extends Object
 	 */
 	private function assertWritable()
 	{
-		if ($this->file->readOnly) {
+		if ($this->source->readOnly) {
 			throw new ReadOnlyException;
 		}
 	}

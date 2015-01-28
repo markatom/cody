@@ -15,19 +15,16 @@ class Progress extends Object
 	private $output;
 
 	/** @var int */
-	private $started;
+	private $startedAt;
 
 	/** @var int */
 	private $counter;
 
 	/** @var int */
-	private $errors;
+	private $errorsCount;
 
 	/** @var int */
-	private $warnings;
-
-	/** @var int */
-	private $total;
+	private $totalCount;
 
 	/** @var int */
 	private $runTime;
@@ -45,26 +42,26 @@ class Progress extends Object
 	 */
 	public function start($totalCount)
 	{
-		$this->started = microtime();
-		$this->counter = $this->warnings = $this->errors = 0;
-		$this->total   = $totalCount;
+		$this->startedAt  = microtime();
+		$this->counter    = $this->errorsCount = 0;
+		$this->totalCount = $totalCount;
 
 		$this->output->write('  ');
 	}
 
 	/**
-	 * @param File $file
+	 * @param SourceCode $source
 	 */
-	public function advance(File $file)
+	public function advance(SourceCode $source)
 	{
-		$mark = $file->errorsCount
-			? "\033[1;37;41mE\033[0m"
-			: ($file->warningsCount ? 'W' : '.');
+		$mark = $source->getErrors()
+			? "\033[1;37;41m!\033[0m"
+			: '.';
+
 
 		$this->output->write($mark);
 
-		$this->warnings += $file->warningsCount;
-		$this->errors   += $file->errorsCount;
+		$this->errorsCount += count($source->getErrors());
 
 		$this->counter++;
 
@@ -76,7 +73,7 @@ class Progress extends Object
 
 	public function finish()
 	{
-		$this->runTime = microtime() - $this->started;
+		$this->runTime = microtime() - $this->startedAt;
 
 		$this->output->write(str_repeat(' ', 50 - $this->counter % 50));
 
@@ -88,15 +85,7 @@ class Progress extends Object
 	 */
 	public function getErrorsCount()
 	{
-		return $this->errors;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getWarningsCount()
-	{
-		return $this->warnings;
+		return $this->errorsCount;
 	}
 
 	/**
@@ -108,9 +97,11 @@ class Progress extends Object
 		return $this->runTime;
 	}
 
+	/**
+	 */
 	private function writeCounter()
 	{
-		$this->output->writeLine('  ' . $this->counter . '/' . $this->total);
+		$this->output->writeLine('  ' . $this->counter . '/' . $this->totalCount);
 	}
 
 }

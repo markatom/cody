@@ -26,7 +26,7 @@ class Finder extends Object
 		$result = $found = [];
 
 		foreach (NetteFinder::find($extensions)->from('.') as $name => $file) {
-			$found[] = substr($name, 1); // remove .
+			$found[] = substr($name, 1); // remove '.'
 		}
 
 		foreach ($masks as $mask) {
@@ -48,6 +48,10 @@ class Finder extends Object
 					}
 				}
 			}
+		}
+
+		foreach ($result as & $name) {
+			$name = substr($name, 1); // remove /
 		}
 
 		return array_values($result);

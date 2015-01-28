@@ -75,7 +75,7 @@ class Option extends Object
 	{
 		if ($given === NULL) {
 			if ($this->default === NULL) {
-				throw new RequiredValueException();
+				throw new RequiredOptionException;
 			}
 
 			return $this->default;
@@ -84,25 +84,25 @@ class Option extends Object
 		switch ($this->type) {
 			case self::BOOL:
 				if (!is_bool($given)) {
-					throw new InvalidValueException('expected boolean');
+					throw InvalidOptionException::expected('boolean');
 				}
 
 				break;
 
 			case self::ENUM:
 				if (!is_string($given)) {
-					throw new InvalidValueException('expected string');
+					throw InvalidOptionException::expected('string');
 				}
 
 				if (!in_array($given, $this->values)) {
-					throw new InvalidValueException('expected one of [' . implode(', ', $this->values) . ']');
+					throw InvalidOptionException::expected('one of [' . implode(', ', $this->values) . ']');
 				}
 
 				break;
 
 			case self::INT:
 				if (!is_int($given)) {
-					throw new InvalidValueException('expected integer');
+					throw InvalidOptionException::expected('integer');
 				}
 
 				break;

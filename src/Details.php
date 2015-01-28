@@ -21,7 +21,7 @@ class Details extends Object
 
 	private $errorsCount = 0;
 
-	/** @var File[] */
+	/** @var SourceCode[] */
 	private $files = [];
 
 	public function writeMessages()
@@ -33,7 +33,7 @@ class Details extends Object
 				list($line, $column) = Position::offsetToLineAndColumn($marker->offset, $file);
 
 				echo "\t["
-				. $marker->type === Mark::TYPE_ERROR ? '[ERROR at]' : '[WARNING at] '
+				. $marker->type === Error::TYPE_ERROR ? '[ERROR at]' : '[WARNING at] '
 					. $line // todo
 					. ':'
 					. $column
@@ -60,12 +60,12 @@ class Details extends Object
 		echo "Run with show option to show warnings and violations in source code." . PHP_EOL;
 	}
 
-	private function prepareMessages(File $file)
+	private function prepareMessages(SourceCode $source)
 	{
 		$messages = [];
 
-		foreach ($file->errorsCount as $error) {
-			$position = Position::offsetToLineAndColumn($error->offset, $file);
+		foreach ($source->errorsCount as $error) {
+			$position = Position::offsetToLineAndColumn($error->offset, $source);
 			$messages[] = [
 				'offset'  => $error->offset,
 				'line'    => $position[0],
@@ -75,8 +75,8 @@ class Details extends Object
 			];
 		}
 
-		foreach ($file->warnings as $warning) {
-			$position = Position::offsetToLineAndColumn($warning->offset, $file);
+		foreach ($source->warnings as $warning) {
+			$position = Position::offsetToLineAndColumn($warning->offset, $source);
 			$messages[] = [
 				'offset'  => $warning->offset,
 				'line'    => $position[0],

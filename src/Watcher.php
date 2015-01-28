@@ -13,35 +13,36 @@ use Nette\Object;
 abstract class Watcher extends Object
 {
 
-	private $file;
-
-	private $options;
+	private $source;
 
 	private $readOnly;
 
-	private $result;
+	protected $options;
 
 	/** @var Tokenizer */
 	protected $tokenizer;
 
-	public final function __construct(File $file, array $options, $readOnly)
+	public final function __construct(SourceCode $source, array $options, $readOnly)
 	{
-		$this->file     = $file;
-		$this->options  = $options;
-		$this->readOnly = $readOnly;
+		$this->source    = $source;
+		$this->options   = $options;
+		$this->readOnly  = $readOnly;
+	}
 
-		$this->result = new Result($file);
+	public function setTokenizer(Tokenizer $tokenizer)
+	{
+		$this->tokenizer = $tokenizer;
 	}
 
 	/**
 	 * @return array
 	 */
-	public abstract function watchedTokens();
+	public abstract function getWatchedTokens();
 
 	/**
 	 * @return array
 	 */
-	public function definedOptions()
+	public static function getDefinedOptions()
 	{
 		return [];
 	}
@@ -52,7 +53,11 @@ abstract class Watcher extends Object
 	 */
 	public final function addError($token, $message)
 	{
-		trigger_error('Not Implemented!', E_USER_WARNING);
+		if (!$token instanceof Token && !$token instanceof JoinedTokens) {
+			throw self::invalidTokenException($token);
+		}
+
+		$this->source->addError($token->getOffset(), $token->getLength(), $message);
 	}
 
 	/**
@@ -71,17 +76,22 @@ abstract class Watcher extends Object
 	/**
 	 * @return bool
 	 */
-	public function isReadOnly()
+	public final function isReadOnly()
 	{
 		return $this->readOnly;
 	}
 
 	/**
-	 * @return Result
+	 * @param mixed $given
+	 * @return InvalidArgumentException
 	 */
-	public function getResult()
+	private static function invalidTokenException($given)
 	{
-		return $this->result;
+		$given = is_object($given)
+			? get_class($given)
+			: gettype($given);
+
+		return new InvalidArgumentException("Token must be instance of Markatom\\Cody\\Token or Markatom\\Cody\\JoinedTokens, $given given.");
 	}
 
 }

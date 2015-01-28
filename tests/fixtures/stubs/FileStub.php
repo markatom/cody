@@ -3,7 +3,7 @@
 namespace Testing\Fixtures\Stubs;
 
 use Markatom\Cody\Fileable;
-use Markatom\Cody\Mark;
+use Markatom\Cody\Error;
 use Nette\Object;
 use Testing\NotImplementedException;
 
@@ -17,7 +17,7 @@ class FileStub extends Object implements Fileable
 	/** @var string */
 	private $path;
 
-	/** @var Mark[] */
+	/** @var Error[] */
 	private $marks;
 
 	public function __construct($path, array $marks = [])
@@ -89,7 +89,7 @@ class FileStub extends Object implements Fileable
 	}
 
 	/**
-	 * @return Mark[]
+	 * @return Error[]
 	 */
 	public function getMarks()
 	{

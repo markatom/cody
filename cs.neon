@@ -1,0 +1,12 @@
+extensions:
+	- php
+	- phpt
+
+sources:
+	- src
+	- tests
+
+watchers:
+	- Markatom\Watchers\Boolean
+	- Markatom\Watchers\Naming
+	- Markatom\Watchers\Null

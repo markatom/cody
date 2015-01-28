@@ -1,6 +1,6 @@
 <?php
 
-use Markatom\Cody\FileMarksTable;
+use Markatom\Cody\Table;
 use Tester\Assert;
 use Testing\Fixtures\Stubs\OutputStub;
 
@@ -35,7 +35,7 @@ $file = FileStub::createWithoutConstructor()
 				. ' magna, ac suscipit velit viverra sed'),
 	]);
 
-$table = new FileMarksTable($output, $file);
+$table = new Table($output, $file);
 
 $table->render();
 
@@ -74,7 +74,7 @@ $file = FileStub::createWithoutConstructor()
 					. ' southern Hawke\'s Bay, New Zealand.'),
 	]);
 
-$table = new FileMarksTable($output, $file);
+$table = new Table($output, $file);
 
 $table->render();
 

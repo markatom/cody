@@ -1,6 +1,6 @@
 <?php
 
-use Markatom\Cody\Mark;
+use Markatom\Cody\Error;
 use Markatom\Cody\Utils\Position;
 use Tester\Assert;
 
@@ -63,7 +63,7 @@ foreach ($lineBreaks as $lineBreak) {
 			? $test['windowsOffset']
 			: $test['offset'];
 
-		$mark = new Mark($file, $offset, 0, 0, '');
+		$mark = new Error($file, $offset, 0, 0, '');
 
 		Assert::equal($test['expectedLine'], $mark->getLine());
 		Assert::equal($test['expectedColumn'], $mark->getColumn());

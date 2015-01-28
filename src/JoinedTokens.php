@@ -47,4 +47,25 @@ class JoinedTokens extends Object
 		return $content;
 	}
 
+	/**
+	 * @return int
+	 */
+	public function getOffset()
+	{
+		return $this->tokens[0]->getOffset();
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getLength()
+	{
+		$length = 0;
+		foreach ($this->tokens as $token) {
+			$length += $token->getLength();
+		}
+
+		return $length;
+	}
+
 }

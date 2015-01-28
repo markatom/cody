@@ -18,9 +18,9 @@ class CodePrinter extends Object
         $this->context = $context;
     }
 
-	public function write(Mark $mark)
+	public function write(Error $mark)
     {
-        $withoutTabs  = Whitespace::expandTabs($mark->file->content);
+        $withoutTabs  = Whitespace::expandTabs($mark->source->content);
         $lines        = Whitespace::toLines($withoutTabs);
         $linesCount   = count($lines);
         $markedLines  = Whitespace::countLineBreaks($mark->marked) + 1;

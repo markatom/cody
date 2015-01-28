@@ -9,25 +9,22 @@ use Nette\Object;
  * @todo Fill desc.
  * @author Tomáš Markacz
  */
-class FileMarksTable extends Object
+class Table extends Object
 {
+
+	const ERROR = 'ERROR';
 
 	const LINE_LENGTH = 80;
 
 	/** @var Output */
 	private $output;
 
-	/** @var File */
-	private $file;
+	/** @var SourceCode */
+	private $source;
 
-	private static $types = [
-		Mark::TYPE_ERROR   => 'ERROR',
-		Mark::TYPE_WARNING => 'WARNING'
-	];
-
-	public function __construct(Output $output, File $file)
+	public function __construct(Output $output, SourceCode $source)
     {
-		$this->file   = $file;
+		$this->source = $source;
 		$this->output = $output;
 	}
 
@@ -37,41 +34,41 @@ class FileMarksTable extends Object
 
 		$columnWidths = $this->getColumnWidths();
 
-		foreach ($this->file->marks as $mark) {
-			$this->renderMark($mark, $columnWidths);
+		foreach ($this->source->getErrors() as $error) {
+			$this->renderError($error, $columnWidths);
 		}
 	}
 
 	private function renderHeader()
 	{
-		$this->output->writeLine('Details for ' . $this->file->path . ':');
+		$this->output->writeLine('Details for ' . $this->source->getFile()->getPath() . ':');
 	}
 
 	private function getColumnWidths()
 	{
 		$widths = [0, 0, 0];
 
-		foreach ($this->file->marks as $marker) {
-			if (strlen(self::$types[$marker->type]) > $widths[0]) {
-				$widths[0] = strlen(self::$types[$marker->type]);
+		foreach ($this->source->getErrors() as $error) {
+			if (strlen(self::ERROR) > $widths[0]) {
+				$widths[0] = strlen(self::ERROR);
 			}
 
-			if (strlen($marker->line) > $widths[1]) {
-				$widths[1] = strlen($marker->line);
+			if (strlen($error->line) > $widths[1]) {
+				$widths[1] = strlen($error->line);
 			}
 
-			if (strlen($marker->column) > $widths[2]) {
-				$widths[2] = strlen($marker->column);
+			if (strlen($error->column) > $widths[2]) {
+				$widths[2] = strlen($error->column);
 			}
 		}
 
 		return $widths;
 	}
 
-	private function renderMark(Mark $mark, array $columnWidths)
+	private function renderError(Error $mark, array $columnWidths)
 	{
-		$row = self::$types[$mark->type];
-		$row .= str_repeat(' ', $columnWidths[0] - strlen(self::$types[$mark->type]));
+		$row = self::ERROR;
+		$row .= str_repeat(' ', $columnWidths[0] - strlen(self::ERROR));
 
 		$row .= ' ';
 
